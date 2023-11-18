@@ -1,14 +1,14 @@
 /+ dub.sdl:
 	name "test"
-	dependency "freeimage-static" path="."
+	dependency "libjxl-d" path="."
 +/
 module test;
 
-import freeimage;
+import jxl.decode;
 
 void main()
 {
-	FreeImage_Initialise(true);
-	assert(FreeImage_GetVersion() !is null);
-	FreeImage_DeInitialise();
+	auto dec = JxlDecoderCreate(null);
+	assert(dec !is null);
+	JxlDecoderDestroy(dec);
 }
