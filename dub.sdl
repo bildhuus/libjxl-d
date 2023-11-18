@@ -1,0 +1,13 @@
+name "jxl-d"
+description "D headers and binaries for libjxl"
+license "BSD 3-clause"
+
+targetType "sourceLibrary"
+
+sourceFiles "lib/windows-x86_64/jxl-static.lib" "lib/windows-x86_64/brotlicommon.lib" "lib/windows-x86_64/brotlidec.lib" "lib/windows-x86_64/brotlienc.lib" "lib/windows-x86_64/hwy.lib" platform="windows-x86_64"
+sourceFiles "lib/windows-x86/jxl-static.lib" platform="windows-x86"
+libs ":${PACKAGE_DIR}/lib/linux-x86_64/libjxl-static.a" platform="linux-x86_64"
+sourceFiles "lib/macos-x86_64/libjxl-static.a" platform="osx-x86_64"
+sourceFiles "lib/macos-arm64/libjxl-static.a" platform="osx-aarch64"
+sourceFiles "lib/ios-arm64/libjxl-static-arm64.a" platform="ios-aarch64"
+sourceFiles "lib/ios-simulator-x86_64/libjxl-static-simulator.a" platform="ios-x86_64"
