@@ -1,13 +1,13 @@
 name: CI
 
-# Only triggers on pushes/PRs to master
+# Only triggers on pushes/PRs to main
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches:
-      - master
+      - main
 
 jobs:
   windows-x86_64:
