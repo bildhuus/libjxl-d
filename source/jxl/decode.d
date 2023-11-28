@@ -1323,7 +1323,7 @@ JxlDecoderStatus JxlDecoderSetDecompressBoxes(JxlDecoder* dec, JXL_BOOL decompre
  * @return @ref JXL_DEC_SUCCESS if the value is available, @ref JXL_DEC_ERROR if
  *     not, for example the JXL file does not use the container format.
  */
-JxlDecoderStatus JxlDecoderGetBoxType(JxlDecoder* dec, JxlBoxType type, JXL_BOOL decompressed);
+JxlDecoderStatus JxlDecoderGetBoxType(JxlDecoder* dec, ref JxlBoxType type, JXL_BOOL decompressed);
 
 /**
  * Returns the size of a box as it appears in the container file, after the @ref
