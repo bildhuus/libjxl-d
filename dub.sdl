@@ -11,6 +11,7 @@ sourceFiles "lib/macos-x86_64/libjxl.a" "lib/macos-x86_64/libjxl_cms.a" "lib/mac
 sourceFiles "lib/macos-arm64/libjxl.a" "lib/macos-arm64/libjxl_cms.a" "lib/macos-arm64/libbrotlicommon.a" "lib/macos-arm64/libbrotlidec.a" "lib/macos-arm64/libbrotlienc.a" "lib/macos-arm64/libhwy.a" platform="osx-aarch64"
 sourceFiles "lib/ios-arm64/libjxl.a" "lib/ios-arm64/libjxl_cms.a" "lib/ios-arm64/libbrotlicommon.a" "lib/ios-arm64/libbrotlidec.a" "lib/ios-arm64/libbrotlienc.a" "lib/ios-arm64/libhwy.a" platform="ios-aarch64"
 sourceFiles "lib/ios-simulator-x86_64/libjxl.a" "lib/ios-simulator-x86_64/libjxl_cms.a""lib/ios-simulator-x86_64/libbrotlicommon.a" "lib/ios-simulator-x86_64/libbrotlidec.a" "lib/ios-simulator-x86_64/libbrotlienc.a" "lib/ios-simulator-x86_64/libhwy.a" platform="ios-x86_64"
+lflags "${PACKAGE_DIR}/lib/android-arm64/libjxl.a" "${PACKAGE_DIR}/lib/android-arm64/libjxl_cms.a" "${PACKAGE_DIR}/lib/android-arm64/libbrotlidec.a" "${PACKAGE_DIR}/lib/android-arm64/libbrotlienc.a" "${PACKAGE_DIR}/lib/android-arm64/libbrotlicommon.a" "${PACKAGE_DIR}/lib/android-arm64/libhwy.a" platform="android-aarch64"
 
 libs "c++" platform="ios"
 libs "c++" platform="osx"
