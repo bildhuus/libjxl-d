@@ -1,61 +1,87 @@
-module jxl.cms_interface;
-@nogc nothrow:
-extern(C): __gshared:
+/* Copyright (c) the JPEG XL Project Authors. All rights reserved.
+ *
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
 
-public import jxl.color_encoding;
+/** @addtogroup libjxl_color
+ * @{
+ * @file cms_interface.h
+ * @brief Interface to allow the injection of different color management systems
+ * (CMSes, also called color management modules, or CMMs) in JPEG XL.
+ *
+ * A CMS is needed by the JPEG XL encoder and decoder to perform colorspace
+ * conversions. This defines an interface that can be implemented for different
+ * CMSes and then passed to the library.
+ */
+module jxl.cms_interface;
+
+import jxl.color_encoding;
 public import jxl.types;
+
+extern (C):
 
 /** Parses an ICC profile and populates @p c and @p cmyk with the data.
  *
- * @param user_data JxlCmsInterface::set_fields_data passed as-is.
+ * @param user_data @ref JxlCmsInterface::set_fields_data passed as-is.
  * @param icc_data the ICC data to parse.
  * @param icc_size how many bytes of icc_data are valid.
- * @param c a JxlColorEncoding to populate if applicable.
+ * @param c a @ref JxlColorEncoding to populate if applicable.
  * @param cmyk a boolean to set to whether the colorspace is a CMYK colorspace.
  * @return Whether the relevant fields in @p c were successfully populated.
  */
-alias jpegxl_cms_set_fields_from_icc_func = JXL_BOOL function(void* user_data, const(ubyte)* icc_data, size_t icc_size, JxlColorEncoding* c, JXL_BOOL* cmyk);
+alias jpegxl_cms_set_fields_from_icc_func = int function (
+    void* user_data,
+    const(ubyte)* icc_data,
+    size_t icc_size,
+    JxlColorEncoding* c,
+    int* cmyk);
 
 /** Represents an input or output colorspace to a color transform, as a
  * serialized ICC profile. */
-struct JxlColorProfile {
-  /** The serialized ICC profile. This is guaranteed to be present and valid. */
-  struct _Icc {
-    const(ubyte)* data;
-    size_t size;
-  }_Icc icc;
+struct JxlColorProfile
+{
+    /** The serialized ICC profile. This is guaranteed to be present and valid. */
+    struct _Anonymous_0
+    {
+        const(ubyte)* data;
+        size_t size;
+    }
 
-  /** Structured representation of the colorspace, if applicable. If all fields
-   * are different from their "unknown" value, then this is equivalent to the
-   * ICC representation of the colorspace. If some are "unknown", those that are
-   * not are still valid and can still be used on their own if they are useful.
-   */
-  JxlColorEncoding color_encoding;
+    _Anonymous_0 icc;
 
-  /** Number of components per pixel. This can be deduced from the other
-   * representations of the colorspace but is provided for convenience and
-   * validation. */
-  size_t num_channels;
+    /** Structured representation of the colorspace, if applicable. If all fields
+     * are different from their "unknown" value, then this is equivalent to the
+     * ICC representation of the colorspace. If some are "unknown", those that are
+     * not are still valid and can still be used on their own if they are useful.
+     */
+    JxlColorEncoding color_encoding;
+
+    /** Number of components per pixel. This can be deduced from the other
+     * representations of the colorspace but is provided for convenience and
+     * validation. */
+    size_t num_channels;
 }
 
 /** Allocates and returns the data needed for @p num_threads parallel transforms
  * from the @p input colorspace to @p output, with up to @p pixels_per_thread
- * pixels to transform per call to JxlCmsInterface::run. @p init_data comes
- * directly from the JxlCmsInterface instance. Since @c run only receives the
- * data returned by @c init, a reference to @p init_data should be kept there
- * if access to it is desired in @c run. Likewise for JxlCmsInterface::destroy.
+ * pixels to transform per call to @ref JxlCmsInterface::run. @p init_data comes
+ * directly from the @ref JxlCmsInterface instance. Since @c run only receives
+ * the data returned by @c init, a reference to @p init_data should be kept
+ * there if access to it is desired in @c run. Likewise for @ref
+ * JxlCmsInterface::destroy.
  *
  * The ICC data in @p input and @p output is guaranteed to outlive the @c init /
  * @c run / @c destroy cycle.
  *
- * @param init_data JxlCmsInterface::init_data passed as-is.
+ * @param init_data @ref JxlCmsInterface::init_data passed as-is.
  * @param num_threads the maximum number of threads from which
- *        JxlCmsInterface::run will be called.
+ *        @ref JxlCmsInterface::run will be called.
  * @param pixels_per_thread the maximum number of pixels that each call to
- *        JxlCmsInterface::run will have to transform.
+ *        @ref JxlCmsInterface::run will have to transform.
  * @param input_profile the input colorspace for the transform.
- * @param output_profile the colorspace to which JxlCmsInterface::run should
- *        convert the input data.
+ * @param output_profile the colorspace to which @ref JxlCmsInterface::run
+ * should convert the input data.
  * @param intensity_target for colorspaces where luminance is relative
  *        (essentially: not PQ), indicates the luminance at which (1, 1, 1) will
  *        be displayed. This is useful for conversions between PQ and a relative
@@ -73,7 +99,13 @@ struct JxlColorProfile {
  * @return The data needed for the transform, or @c NULL in case of failure.
  *         This will be passed to the other functions as @c user_data.
  */
-alias jpegxl_cms_init_func = void* function(void* init_data, size_t num_threads, size_t pixels_per_thread, const(JxlColorProfile)* input_profile, const(JxlColorProfile)* output_profile, float intensity_target);
+alias jpegxl_cms_init_func = void* function (
+    void* init_data,
+    size_t num_threads,
+    size_t pixels_per_thread,
+    const(JxlColorProfile)* input_profile,
+    const(JxlColorProfile)* output_profile,
+    float intensity_target);
 
 /** Returns a buffer that can be used by callers of the interface to store the
  * input of the conversion or read its result, if they pass it as the input or
@@ -82,7 +114,7 @@ alias jpegxl_cms_init_func = void* function(void* init_data, size_t num_threads,
  * @param thread the index of the thread for which to return a buffer.
  * @return A buffer that can be used by the caller for passing to @c run.
  */
-alias jpegxl_cms_get_buffer_func = float* function(void* user_data, size_t thread);
+alias jpegxl_cms_get_buffer_func = float* function (void* user_data, size_t thread);
 
 /** Executes one transform and returns true on success or false on error. It
  * must be possible to call this from different threads with different values
@@ -105,14 +137,19 @@ alias jpegxl_cms_get_buffer_func = float* function(void* user_data, size_t threa
  * @param output_buffer the buffer receiving the transformed pixel data.
  * @param num_pixels the number of pixels to transform from @p input to
  * @p output.
- * @return JXL_TRUE on success, JXL_FALSE on failure.
+ * @return ::JXL_TRUE on success, ::JXL_FALSE on failure.
  */
-alias jpegxl_cms_run_func = JXL_BOOL function(void* user_data, size_t thread, const(float)* input_buffer, float* output_buffer, size_t num_pixels);
+alias jpegxl_cms_run_func = int function (
+    void* user_data,
+    size_t thread,
+    const(float)* input_buffer,
+    float* output_buffer,
+    size_t num_pixels);
 
 /** Performs the necessary clean-up and frees the memory allocated for user
  * data.
  */
-alias jpegxl_cms_destroy_func = void function(void*);
+alias jpegxl_cms_destroy_func = void function (void*);
 
 /**
  * Interface for performing colorspace transforms. The @c init function can be
@@ -190,24 +227,29 @@ alias jpegxl_cms_destroy_func = void function(void*);
  * }
  * @enddot
  */
-struct JxlCmsInterface {
-  /** CMS-specific data that will be passed to @ref set_fields_from_icc. */
-  void* set_fields_data;
-  /** Populates a JxlColorEncoding from an ICC profile. */
-  jpegxl_cms_set_fields_from_icc_func set_fields_from_icc;
+struct JxlCmsInterface
+{
+    /** CMS-specific data that will be passed to @ref set_fields_from_icc. */
+    void* set_fields_data;
+    /** Populates a @ref JxlColorEncoding from an ICC profile. */
+    jpegxl_cms_set_fields_from_icc_func set_fields_from_icc;
 
-  /** CMS-specific data that will be passed to @ref init. */
-  void* init_data;
-  /** Prepares a colorspace transform as described in the documentation of @ref
-   * jpegxl_cms_init_func. */
-  jpegxl_cms_init_func init;
-  /** Returns a buffer that can be used as input to @c run. */
-  jpegxl_cms_get_buffer_func get_src_buf;
-  /** Returns a buffer that can be used as output from @c run. */
-  jpegxl_cms_get_buffer_func get_dst_buf;
-  /** Executes the transform on a batch of pixels, per @ref jpegxl_cms_run_func.
-   */
-  jpegxl_cms_run_func run;
-  /** Cleans up the transform. */
-  jpegxl_cms_destroy_func destroy;
+    /** CMS-specific data that will be passed to @ref init. */
+    void* init_data;
+    /** Prepares a colorspace transform as described in the documentation of @ref
+     * jpegxl_cms_init_func. */
+    jpegxl_cms_init_func init;
+    /** Returns a buffer that can be used as input to @c run. */
+    jpegxl_cms_get_buffer_func get_src_buf;
+    /** Returns a buffer that can be used as output from @c run. */
+    jpegxl_cms_get_buffer_func get_dst_buf;
+    /** Executes the transform on a batch of pixels, per @ref jpegxl_cms_run_func.
+     */
+    jpegxl_cms_run_func run;
+    /** Cleans up the transform. */
+    jpegxl_cms_destroy_func destroy;
 }
+
+/* JXL_CMS_INTERFACE_H_ */
+
+/** @} */
